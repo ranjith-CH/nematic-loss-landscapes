@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nematic Director Dynamics in Neural Network Loss Landscapes</title>
+<meta name="description" content="Geometric predictors of training instability via Hessian eigenvector field dynamics. Ranjith Kumar Chilupuri, CNRS Paris 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:     #0f0e0c;
+    --paper:   #f7f4ee;
+    --muted:   #6b6660;
+    --rule:    #d4cfc6;
+    --accent:  #1a3a6b;
+    --accent2: #8b2020;
+    --mono:    'JetBrains Mono', monospace;
+    --serif:   'EB Garamond', Georgia, serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 18px; scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding: 3.5rem 0 2.5rem;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .journal-tag {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .journal-tag::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.3;
+  }
+
+  h1 {
+    font-size: 2.1rem;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 720px;
+    margin-bottom: 1.25rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .authors {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .affil {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── NAV LINKS ── */
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+
+  .nav-links a:hover { border-color: var(--accent); }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+  }
+
+  /* ── ABSTRACT ── */
+  .abstract-block {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0 2.5rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 2rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 0.35rem;
+  }
+
+  .abstract-text {
+    font-size: 1rem;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+
+  /* ── RESULTS STRIP ── */
+  .results-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--rule);
+    margin-bottom: 3.5rem;
+  }
+
+  .result-cell {
+    padding: 1.4rem 1.2rem;
+    border-right: 1px solid var(--rule);
+    transition: background 0.2s;
+  }
+
+  .result-cell:last-child { border-right: none; }
+  .result-cell:hover { background: rgba(26,58,107,0.04); }
+
+  .result-val {
+    font-family: var(--mono);
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+  }
+
+  .result-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── CONTENT SECTIONS ── */
+  .content-section {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0 2.5rem;
+    border-top: 1px solid var(--rule);
+    padding: 2.5rem 0;
+  }
+
+  .content-section h2 {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 400;
+    padding-top: 0.35rem;
+  }
+
+  .content-body p {
+    font-size: 0.98rem;
+    line-height: 1.85;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+
+  .content-body p:last-child { margin-bottom: 0; }
+
+  /* ── EQUATIONS ── */
+  .eq {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    background: rgba(26,58,107,0.05);
+    border-left: 2px solid var(--accent);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    color: var(--accent);
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+
+  /* ── FINDINGS LIST ── */
+  .findings {
+    list-style: none;
+    margin: 0.5rem 0;
+  }
+
+  .findings li {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1.8rem 1fr;
+    gap: 0 0.5rem;
+    color: var(--ink);
+  }
+
+  .findings li:last-child { border-bottom: none; }
+
+  .find-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    padding-top: 0.3rem;
+    font-weight: 500;
+  }
+
+  .find-stat {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent2);
+  }
+
+  /* ── CODE FILES ── */
+  .file-list {
+    list-style: none;
+  }
+
+  .file-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.88rem;
+  }
+
+  .file-list li:last-child { border-bottom: none; }
+
+  .file-name {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    min-width: 260px;
+  }
+
+  .file-desc {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* ── CITATION ── */
+  .citation-box {
+    background: rgba(26,58,107,0.04);
+    border: 1px solid var(--rule);
+    padding: 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    line-height: 1.7;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── LIMITATIONS ── */
+  .limitation {
+    background: rgba(139,32,32,0.04);
+    border-left: 2px solid var(--accent2);
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem;
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer span {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  footer a:hover { border-color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    h1 { font-size: 1.5rem; }
+    .abstract-block,
+    .content-section { grid-template-columns: 1fr; gap: 0.75rem 0; }
+    .results-strip { grid-template-columns: repeat(2, 1fr); }
+    .result-cell:nth-child(2) { border-right: none; }
+    .result-cell:nth-child(1),
+    .result-cell:nth-child(2) { border-bottom: 1px solid var(--rule); }
+    .file-name { min-width: 0; }
+    .file-list li { flex-direction: column; gap: 0.2rem; }
+    header { position: static; }
+  }
+
+  /* ── FADE IN ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  header { animation: fadeUp 0.5s ease both; }
+  .results-strip { animation: fadeUp 0.5s 0.1s ease both; }
+  .abstract-block { animation: fadeUp 0.5s 0.05s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="journal-tag">Preprint · 2026 · cs.LG / cond-mat.dis-nn</div>
+    <h1>Nematic Director Dynamics in Neural Network Loss Landscapes: <em>Geometric Predictors of Training Instability</em></h1>
+    <p class="authors">Ranjith Kumar Chilupuri</p>
+    <p class="affil">Institut Jacques Monod, CNRS &amp; Université Paris Cité &nbsp;·&nbsp; May 2026</p>
+    <nav class="nav-links" aria-label="Quick links">
+      <a href="paper.pdf">PDF</a>
+      <a href="https://github.com/Ranjith-CH/nematic-loss-landscapes">Code</a>
+      <a href="#abstract">Abstract</a>
+      <a href="#framework">Framework</a>
+      <a href="#results">Results</a>
+      <a href="#limitations">Limitations</a>
+      <a href="#cite">Cite</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- RESULTS STRIP -->
+  <div class="results-strip" role="region" aria-label="Key numerical results">
+    <div class="result-cell">
+      <span class="result-val">r = 0.905</span>
+      <span class="result-label">Ω(t) vs gradient instabilities<br><span style="font-family:var(--mono);font-size:0.72rem;color:var(--accent2)">p = 2.8×10⁻³⁰</span></span>
+    </div>
+    <div class="result-cell">
+      <span class="result-val">r = 0.789</span>
+      <span class="result-label">Frank energy vs 1/Δλ<br><span style="font-family:var(--mono);font-size:0.72rem;color:var(--accent2)">p = 1.5×10⁻⁴³</span></span>
+    </div>
+    <div class="result-cell">
+      <span class="result-val">−47%</span>
+      <span class="result-label">Frank energy: Adam vs SGD<br><span style="font-family:var(--mono);font-size:0.72rem;color:var(--accent2)">controlled comparison</span></span>
+    </div>
+    <div class="result-cell">
+      <span class="result-val">4.9×</span>
+      <span class="result-label">Ω spike at grokking transition<br><span style="font-family:var(--mono);font-size:0.72rem;color:var(--accent2)">Δλ collapses −81%</span></span>
+    </div>
+  </div>
+
+  <!-- ABSTRACT -->
+  <div class="abstract-block" id="abstract">
+    <span class="section-label">Abstract</span>
+    <p class="abstract-text">
+      We propose a geometric framework for neural network loss landscapes in which
+      the leading Hessian eigenvector is treated as a <em>nematic director</em> evolving
+      along the gradient descent trajectory. The Frank elastic energy of this field —
+      measured by the accumulated director angular velocity Ω(t) — predicts gradient
+      instabilities during training (r = 0.905, p = 2.8×10⁻³⁰). The spectral gap
+      Δλ = λ₁ − λ₂ measures director field stiffness and correlates with training
+      difficulty (r = 0.789, p = 1.5×10⁻⁴³). Adam reduces accumulated Frank energy
+      by 47% relative to SGD, providing a geometric explanation for its stability
+      advantage. At the grokking transition in a transformer trained on modular
+      arithmetic, Ω peaks 4.9× baseline, Δλ spikes then collapses 81%, and sharpness
+      λ₁ drops 40% simultaneously — demonstrating that behavioural transitions produce
+      measurable geometric signatures. We propose Ω(t) and Δλ as lightweight monitoring
+      signals for training instability detection.
+    </p>
+  </div>
+
+  <!-- FRAMEWORK -->
+  <div class="content-section" id="framework">
+    <h2>Framework</h2>
+    <div class="content-body">
+      <p>
+        At each training step t, the network sits at parameter point θ(t) ∈ ℝᴺ.
+        The local loss landscape L(θ(t) + δ) is characterised to second order by the
+        Hessian H(θ(t)) = ∇²L(θ(t)). We define the <strong>nematic director</strong>
+        as the leading Hessian eigenvector:
+      </p>
+      <div class="eq">n(t) = v₁(θ(t)) / ‖v₁(θ(t))‖   ∈ Sᴺ⁻¹
+
+Note: n ≡ −n  (eigenvectors are headless — exact nematic symmetry)</div>
+      <p>
+        The director captures the principal curvature direction of the local landscape.
+        We characterise its dynamics through two scalar quantities:
+      </p>
+      <div class="eq">Ω(t)  = 1 − |⟨n(t), n(t−1)⟩|          [angular velocity, ∈ [0,1]]
+Δλ(t) = λ₁(t) − λ₂(t)                   [spectral gap, ≥ 0]
+F(t)  = Σₛ₌₀ᵗ Ω(s)²                      [accumulated Frank energy]</div>
+      <p>
+        High Ω(t) indicates the local landscape's principal curvature direction is
+        rotating rapidly — the optimizer is navigating geometrically disordered terrain.
+        Low Δλ(t) indicates the director is poorly defined (two nearly equal eigenvalues),
+        making the landscape nearly isotropic locally. Both signal reduced training stability.
+      </p>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="content-section" id="results">
+    <h2>Results</h2>
+    <div class="content-body">
+      <ul class="findings">
+        <li>
+          <span class="find-num">E1</span>
+          <span>
+            <strong>Ω(t) predicts gradient instabilities.</strong>
+            Across training runs on CIFAR-10 with varying learning rates,
+            director angular velocity Ω(t) predicts subsequent gradient norm spikes.
+            <span class="find-stat">r = 0.905, p = 2.8×10⁻³⁰</span>
+          </span>
+        </li>
+        <li>
+          <span class="find-num">E2</span>
+          <span>
+            <strong>Frank energy correlates with spectral gap compression.</strong>
+            In the high-difficulty training regime, accumulated Frank energy F(t)
+            correlates with 1/Δλ(t) — confirming the geometric interpretation.
+            <span class="find-stat">r = 0.789, p = 1.5×10⁻⁴³</span>
+          </span>
+        </li>
+        <li>
+          <span class="find-num">E3</span>
+          <span>
+            <strong>Adam damps director rotation relative to SGD.</strong>
+            Under matched effective learning rates, Adam reduces accumulated Frank
+            energy by 47% compared to SGD — a geometric explanation for Adam's
+            empirical stability advantage.
+            <span class="find-stat">47% reduction, p &lt; 0.05</span>
+          </span>
+        </li>
+        <li>
+          <span class="find-num">E4</span>
+          <span>
+            <strong>Grokking produces a three-signal geometric event.</strong>
+            At the generalisation transition (epoch 1220) in a transformer trained
+            on modular arithmetic (a+b mod 97), three simultaneous signatures appear:
+            Ω peaks 4.9× baseline mean, Δλ spikes to 1859 then collapses 81%,
+            and λ₁ drops 40%. These were predicted before running the experiment.
+            <span class="find-stat">Ω = 4.9×, Δλ collapse = 81%, λ₁ drop = 40%</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LIMITATIONS -->
+  <div class="content-section" id="limitations">
+    <h2>Limitations</h2>
+    <div class="content-body">
+      <div class="limitation">
+        <strong>Trajectory-restricted measurement.</strong> We measure the Frank energy
+        along the gradient descent trajectory, not over the full parameter space.
+        This is the natural observable from a single training run but does not
+        capture the global field structure.
+      </div>
+      <div class="limitation">
+        <strong>No topological claims.</strong> We do not claim topological defects
+        or compute winding numbers. The nematic analogy is used only for the
+        director dynamics and Frank energy — not for topological invariants.
+      </div>
+      <div class="limitation">
+        <strong>Violin plots post-grokking.</strong> The distribution of Ω and Δλ
+        is wider after the grokking transition, not narrower as a simple stability
+        argument would predict. Secondary events at epochs 1900 and 2400 contribute
+        to this variance.
+      </div>
+      <div class="limitation">
+        <strong>Scale.</strong> Experiments use small-to-medium models. Whether
+        the Frank energy signal scales to large language models requires
+        randomised SVD approximations and is left to future work.
+      </div>
+    </div>
+  </div>
+
+  <!-- CODE -->
+  <div class="content-section" id="code">
+    <h2>Code</h2>
+    <div class="content-body">
+      <p>All experiments are reproducible. Code available at
+        <a href="https://github.com/Ranjith-CH/nematic-loss-landscapes" style="color:var(--accent);font-family:var(--mono);font-size:0.85rem;">
+          github.com/Ranjith-CH/nematic-loss-landscapes
+        </a>
+      </p>
+      <ul class="file-list" style="margin-top:1rem;">
+        <li>
+          <span class="file-name">experiment1_omega_instabilities.py</span>
+          <span class="file-desc">Ω(t) vs gradient norm — Experiment 1</span>
+        </li>
+        <li>
+          <span class="file-name">experiment2_frank_energy.py</span>
+          <span class="file-desc">Frank energy vs spectral gap — Experiment 2</span>
+        </li>
+        <li>
+          <span class="file-name">experiment3_adam_vs_sgd.py</span>
+          <span class="file-desc">Optimiser comparison — Experiment 3</span>
+        </li>
+        <li>
+          <span class="file-name">grokking_experiment.py</span>
+          <span class="file-desc">Transformer on modular arithmetic — Experiment 4</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CITE -->
+  <div class="content-section" id="cite">
+    <h2>Cite</h2>
+    <div class="content-body">
+      <pre class="citation-box">@misc{chilupuri2026nematic,
+  title   = {Nematic Director Dynamics in Neural Network Loss
+             Landscapes: Geometric Predictors of Training Instability},
+  author  = {Chilupuri, Ranjith Kumar},
+  year    = {2026},
+  note    = {Preprint},
+  url     = {https://ranjith-ch.github.io/nematic-loss-landscapes}
+}</pre>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>Ranjith Kumar Chilupuri &nbsp;·&nbsp; CNRS &amp; Université Paris Cité &nbsp;·&nbsp; 2026</span>
+  <span><a href="mailto:ranjith.chilupuri@gmail.com">ranjith.chilupuri@gmail.com</a></span>
+</footer>
+
+</body>
+</html>
