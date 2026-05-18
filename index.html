@@ -145,7 +145,17 @@
         <span class="math-comment">The identification \(\mathbf{n} \equiv -\mathbf{n}\) holds automatically — eigenvectors are headless. This is the nematic symmetry, without any additional assumption.</span>
       </div>
     </div>
-
+    
+    <div class="def-block">
+      <p class="def-title">Assumption 1 &mdash; Slow Landscape Variation</p>
+      <p class="def-body">We assume the loss landscape geometry varies slowly relative to the training step size:</p>
+      <div class="math-block">
+        \[ \|\theta(t) - \theta(t-1)\| \;\ll\; \ell_{\mathbf{n}} \]
+        <span class="math-comment">where \(\ell_{\mathbf{n}}\) is the correlation length of the eigenvector field. Under this condition, \(\Omega(t)\) measures genuine geometric evolution rather than sampling artefacts.</span>
+      </div>
+      <p class="def-body">The assumption holds for typical learning rates and is violated near instabilities — precisely when \(\Omega(t)\) spikes. The spikes are therefore a signal of genuine rapid geometric change, not noise.</p>
+    </div>
+    
     <div class="def-block">
       <p class="def-title">Definition 2 &mdash; Angular Velocity \(\Omega(t)\)</p>
       <p class="def-body">Measures how fast the principal curvature direction rotates between consecutive steps:</p>
