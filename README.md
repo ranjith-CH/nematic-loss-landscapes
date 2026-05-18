@@ -1,6 +1,6 @@
 # Nematic Director Dynamics in Neural Network Loss Landscapes
 
-**Ranjith Kumar Chilupuri** — CNRS & Université Paris Cité, 2026
+**Ranjith Kumar Chilupuri** — 2026
 
 We treat the leading Hessian eigenvector as a nematic director evolving 
 along the gradient descent trajectory. The Frank elastic energy predicts 
